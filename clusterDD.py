@@ -12,6 +12,9 @@ import pandas as pd
 import numpy as np
 from random import randint
 from nltk.tokenize import RegexpTokenizer
+from nltk.stem import PorterStemmer
+from nltk.corpus import wordnet as guru
+from nltk.corpus import stopwords
 from sklearn.cluster import KMeans
 
 # code for the kmeans algorithm
@@ -53,14 +56,28 @@ def getFeatures(record):
     text = tokenizer.tokenize(record.lower())
 
     features = {}
-
-    # temporary features
-    if "go" in text:
-        features["contains_go"] = 1
-    else:
-        features["contains_go"] = 0
-    features["length"] = len(record)
+    ps = PorterStemmer()
+    for word in text:
+        # checks stemmed word and associated synonyms against entries in features
+        if word not in stopwords.words('english')
+            word = ps.stem(word)
+            entry_exists = False
+            # if word or any synonyms of word appear in features, add 1 to that count
+            # else create a new entry of word in features
+            for syn in getSyns(word):
+                if syn in features:
+                    entry_exists = True
+                    break
+            if not entry_exists:
+                features[word] = 1
     return features
+
+def getSyns(word):
+    synonyms = []
+    for syn in wordnet.synsets(word):
+        for lemma in syn.lemmas():
+            synonyms.append(lemma.name())
+    return synonyms
 
 # kmeans algorithm from scikitlearn
 def real_k_means(data,k):
