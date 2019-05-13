@@ -13,18 +13,30 @@ import numpy as np
 from random import randint
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem import PorterStemmer
-from nltk.corpus import wordnet as guru
+from nltk.corpus import wordnet
 from nltk.corpus import stopwords
 from sklearn.cluster import KMeans
 
-# code for the kmeans algorithm
+
+''' KMEANS IMPLEMENTATION FUNCTIONS '''
+
+def k_means(test, train, k):
+    model = fit(train, k)
+    predictions = predict(test,model[1])
+    return predictions
+
+# find centroids in cluster?
+def get_nearest_centroid(obs, centroids):
+    dists = np.sqrt(((obs - centroids) ** 2).sum(axis=1))
+    return dists.idxmin()
+
 # given a series of features
 # return a list of cluster ids and number of items in each
-def k_means(data, k):
+def fit(data, k):
     # get random k centroids
     centroids = data.sample(k).reset_index()
-    print("initial centroids ...")
-    print(centroids)
+    #print("initial centroids ...")
+    #print(centroids)
 
     # get clusters
     clusters = data.apply(get_nearest_centroid, centroids=centroids, axis=1)
@@ -38,14 +50,16 @@ def k_means(data, k):
         clusters = data.apply(get_nearest_centroid, centroids=centroids, axis=1)
         new_centroids = data.groupby(clusters).mean()
 
-    print("final centroids....")
-    print(centroids)
-    return clusters
+    #print("final centroids....")
+    #print(centroids)
+    # return clusters?
+    return (clusters,centroids)
 
-# find centroids in cluster?
-def get_nearest_centroid(obs, centroids):
-    dists = np.sqrt(((obs - centroids) ** 2).sum(axis=1))
-    return dists.idxmin()
+# find closest centroids
+def predict(test,centroids):
+    clusters = test.apply(get_nearest_centroid, centroids=centroids, axis=1)
+    #nearest_centroids = test.groupby(clusters).mean()
+    return clusters.values
 
 # pass in single text field
 # return vector of features
@@ -79,13 +93,30 @@ def getSyns(word):
             synonyms.append(lemma.name())
     return synonyms
 
+'''SKLEARN FUNCTION '''
+
 # kmeans algorithm from scikitlearn
-def real_k_means(data,k):
+def real_k_means(test,train,k):
     model = KMeans(n_clusters=k)
-    model.fit(data)
+    model.fit(train)
+    #model.predict(test)
     centroids = model.cluster_centers_
     clusters = model.labels_
     return clusters
+
+'''ANAYLSIS/COMPARISON FUNCTIONS'''
+
+# compare our kmeans to that of sklearn
+def compare_results(our_results, sklearn_results, k):
+    match = 0
+    for i in range(k):
+        if (our_results[i] == sklearn_results[i]):
+            match += 1
+    return (match / k)
+
+# compare our kmeans to the actual results
+def get_accuracy(actual, results):
+    pass
 
 def main():
 
@@ -104,27 +135,37 @@ def main():
     # actual_results = real_k_means(features)
 
     # testing it on a portion of the data
-    test_data = data.iloc[0:100]
+    test_data = data.iloc[0:500]
 
     f = test_data.text.apply(getFeatures)
     feats = pd.DataFrame.from_dict(f)
-    features = pd.DataFrame(list(feats['text']))
+    features = pd.DataFrame(list(feats['text'])).fillna(0)
 
     splitPoint = len(features.index) // 3
     test = features.iloc[:splitPoint, :].reindex()
     train = features.iloc[splitPoint:, :].reindex()
 
-    our_results = k_means(train, 10)
-    actual_result = real_k_means(train, 10)
+    # comparing our cluster ids
+    our_model = fit(train,10)[0].values
+    sklearn_model = real_k_means(test, train, 10)
+    print("...OUR clusters...")
+    print(our_model)
+    print("...SKLEARN clusters ...")
+    print(sklearn_model)
 
-    print("...OUR cluster ids...")
-    print(our_results.values)
+    # see how much ours match sklearns
+    match_percentage = compare_results(our_model, sklearn_model, 10)
+    print("\n OUR CLUSTERING IS %2.2f SIMILAR TO SKLEARN'S CLUSTERING" % match_percentage)
 
-    print("...REAL cluster ids ...")
-    print(actual_result)
+    # our predictions
+    our_results = k_means(test, train, 10)
+    print("\n...Our preidctions")
+    print(our_results)
 
-    # test our results???
-
+    # see how accurate our clustering actually is
+    # accuracy = get_accuracy()
+    print("\n OUR CLUSTERING IS %2.2f ACCURATE" % 0)
+    print("...note: this part is in the works...\n")
 
 if __name__=="__main__":
     main()
