@@ -59,7 +59,7 @@ def getFeatures(record):
     ps = PorterStemmer()
     for word in text:
         # checks stemmed word and associated synonyms against entries in features
-        if word not in stopwords.words('english')
+        if not word in stopwords.words('english'):
             word = ps.stem(word)
             entry_exists = False
             # if word or any synonyms of word appear in features, add 1 to that count
