@@ -136,7 +136,7 @@ def main():
 
     # testing it on a portion of the data
     test_data = data.iloc[0:7716]
-    f = test_data.text.apply(getFeatures)
+    f = data.text.apply(getFeatures)
     feats = pd.DataFrame.from_dict(f)
     features = pd.DataFrame(list(feats['text'])).fillna(0)
 
