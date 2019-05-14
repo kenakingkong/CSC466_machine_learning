@@ -8,11 +8,12 @@
 '''
 
 import sys
+import time
 import pandas as pd
 import numpy as np
 from random import randint
 from nltk.tokenize import RegexpTokenizer
-from nltk.stem import PorterStemmer
+from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 from nltk.corpus import stopwords
 from sklearn.cluster import KMeans
@@ -70,23 +71,22 @@ def getFeatures(record):
     text = tokenizer.tokenize(record.lower())
 
     features = {}
-    ps = PorterStemmer()
+    lm = WordNetLemmatizer()
     for word in text:
         # checks stemmed word and associated synonyms against entries in features
         if not word in stopwords.words('english'):
-            word = ps.stem(word)
+            word = lm.lemmatize(word)
             entry_exists = False
             # if word or any synonyms of word appear in features, add 1 to that count
             # else create a new entry of word in features
-            for syn in getSyns(word):
-                if syn in features:
-                    entry_exists = True
-                    break
+            if word in features:
+                entry_exists = True
+                features[word] += 1
             if not entry_exists:
                 features[word] = 1
     return features
 
-def getSyns(word):
+def IGetSynsNotTragedies(word):
     synonyms = []
     for syn in wordnet.synsets(word):
         for lemma in syn.lemmas():
@@ -123,7 +123,7 @@ def main():
     if (len(sys.argv)!= 2):
         print("Usage: python clusterDD <filename>")
         sys.exit()
-
+    start = time.time()
     file = sys.argv[1]
 
     # read file into a dataframe
@@ -135,8 +135,7 @@ def main():
     # actual_results = real_k_means(features)
 
     # testing it on a portion of the data
-    test_data = data.iloc[0:500]
-
+    test_data = data.iloc[0:7716]
     f = test_data.text.apply(getFeatures)
     feats = pd.DataFrame.from_dict(f)
     features = pd.DataFrame(list(feats['text'])).fillna(0)
@@ -150,22 +149,28 @@ def main():
     sklearn_model = real_k_means(test, train, 10)
     print("...OUR clusters...")
     print(our_model)
-    print("...SKLEARN clusters ...")
-    print(sklearn_model)
+    #mid = time.time()
+    #print('Time So Far:')
+    #print(mid - start)
+    #print("...SKLEARN clusters ...")
+    #print(sklearn_model)
 
     # see how much ours match sklearns
-    match_percentage = compare_results(our_model, sklearn_model, 10)
-    print("\n OUR CLUSTERING IS %2.2f SIMILAR TO SKLEARN'S CLUSTERING" % match_percentage)
+    #match_percentage = compare_results(our_model, sklearn_model, 10)
+    #print("\n OUR CLUSTERING IS %2.2f SIMILAR TO SKLEARN'S CLUSTERING" % match_percentage)
 
     # our predictions
     our_results = k_means(test, train, 10)
-    print("\n...Our preidctions")
+    print("\n...Our predictions")
     print(our_results)
+    end = time.time()
+    #print('Total Time:')
+    #print(end - start)
 
     # see how accurate our clustering actually is
     # accuracy = get_accuracy()
-    print("\n OUR CLUSTERING IS %2.2f ACCURATE" % 0)
-    print("...note: this part is in the works...\n")
+    #print("\n OUR CLUSTERING IS %2.2f ACCURATE" % 0)
+    #print("...note: this part is in the works...\n")
 
 if __name__=="__main__":
     main()
