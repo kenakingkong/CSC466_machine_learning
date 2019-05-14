@@ -5,5 +5,13 @@ K-means clustering and decision tree algorithms on the digital democracy dataset
 * Makena Kong
 * Whitney Larsen
 
-## put the rest of the stuff here
-"explanation and test output of your programs and showing your accuracy, precision, recall and F1 score for parts II and III." 
+## Output of Part 1
+This will output an array of cluster ids assigned to each record.
+Each cluster id represents a different committee.
+
+## Output of Part 2
+This will output an array of cluster ids assigned to each record.
+Each cluster id represents a different committee or hearing.
+
+## Output of Part 3
+In progress.
