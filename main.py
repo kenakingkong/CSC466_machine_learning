@@ -1,5 +1,5 @@
 '''
-    CSCS 466 Project 2 : machine learning 
+    CSCS 466 Project 2 : machine learning
     Makena Kong & Whitney Larsen
 
     Driver
