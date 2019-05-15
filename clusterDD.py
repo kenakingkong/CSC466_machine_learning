@@ -28,7 +28,7 @@ def k_means(test, train, k):
 
 # find centroids in cluster?
 def get_nearest_centroid(obs, centroids):
-    dists = np.sqrt(((obs - centroids) ** 2).sum(axis=1))
+    dists = ((obs - centroids) ** 2).sum(axis=1)
     return dists.idxmin()
 
 # given a series of features
@@ -36,8 +36,6 @@ def get_nearest_centroid(obs, centroids):
 def fit(data, k):
     # get random k centroids
     centroids = data.sample(k).reset_index()
-    #print("initial centroids ...")
-    #print(centroids)
 
     # get clusters
     clusters = data.apply(get_nearest_centroid, centroids=centroids, axis=1)
@@ -136,7 +134,7 @@ def main():
 
     # testing it on a portion of the data
     test_data = data.iloc[0:7716]
-    f = data.text.apply(getFeatures)
+    f = test_data.text.apply(getFeatures)
     feats = pd.DataFrame.from_dict(f)
     features = pd.DataFrame(list(feats['text'])).fillna(0)
 
@@ -149,23 +147,23 @@ def main():
     sklearn_model = real_k_means(test, train, 10)
     print("...OUR clusters...")
     print(our_model)
-    #mid = time.time()
-    #print('Time So Far:')
-    #print(mid - start)
-    #print("...SKLEARN clusters ...")
-    #print(sklearn_model)
+    mid = time.time()
+    print('Time So Far:')
+    print(mid - start)
+    print("...SKLEARN clusters ...")
+    print(sklearn_model)
 
     # see how much ours match sklearns
-    #match_percentage = compare_results(our_model, sklearn_model, 10)
-    #print("\n OUR CLUSTERING IS %2.2f SIMILAR TO SKLEARN'S CLUSTERING" % match_percentage)
+    match_percentage = compare_results(our_model, sklearn_model, 10)
+    print("\n OUR CLUSTERING IS %2.2f SIMILAR TO SKLEARN'S CLUSTERING" % match_percentage)
 
     # our predictions
     our_results = k_means(test, train, 10)
     print("\n...Our predictions")
     print(our_results)
     end = time.time()
-    #print('Total Time:')
-    #print(end - start)
+    print('Total Time:')
+    print(end - start)
 
     # see how accurate our clustering actually is
     # accuracy = get_accuracy()
