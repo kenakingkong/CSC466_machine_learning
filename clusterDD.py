@@ -121,7 +121,6 @@ def main():
     if (len(sys.argv)!= 2):
         print("Usage: python clusterDD <filename>")
         sys.exit()
-    start = time.time()
     file = sys.argv[1]
 
     # read file into a dataframe
@@ -133,8 +132,7 @@ def main():
     # actual_results = real_k_means(features)
 
     # testing it on a portion of the data
-    test_data = data.iloc[0:7716]
-    f = test_data.text.apply(getFeatures)
+    f = data.text.apply(getFeatures)
     feats = pd.DataFrame.from_dict(f)
     features = pd.DataFrame(list(feats['text'])).fillna(0)
 
@@ -147,9 +145,6 @@ def main():
     sklearn_model = real_k_means(test, train, 10)
     print("...OUR clusters...")
     print(our_model)
-    mid = time.time()
-    print('Time So Far:')
-    print(mid - start)
     print("...SKLEARN clusters ...")
     print(sklearn_model)
 
@@ -161,9 +156,6 @@ def main():
     our_results = k_means(test, train, 10)
     print("\n...Our predictions")
     print(our_results)
-    end = time.time()
-    print('Total Time:')
-    print(end - start)
 
     # see how accurate our clustering actually is
     # accuracy = get_accuracy()
